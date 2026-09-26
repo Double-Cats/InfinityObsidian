@@ -1,40 +1,42 @@
-   name: 构建并部署到 GitHub Pages
+name: 构建并部署到 GitHub Pages
 
-   on:
-     push:
-       branches: [main]
-     workflow_dispatch:
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-   permissions:
-     contents: read
-     pages: write
-     id-token: write
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-   concurrency:
-     group: pages
-     cancel-in-progress: true
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
-   jobs:
-     build:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         - uses: actions/setup-node@v4
-           with:
-             node-version: 20
-             cache: npm
-         - run: npm ci
-         - run: npm run build
-         - run: touch dist/.nojekyll
-         - uses: actions/upload-pages-artifact@v3
-           with:
-             path: dist
-     deploy:
-       needs: build
-       runs-on: ubuntu-latest
-       environment:
-         name: github-pages
-         url: ${{ steps.deployment.outputs.page_url }}
-       steps:
-         - id: deployment
-           uses: actions/deploy-pages@v4
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 安装依赖（有 lock 文件用 npm ci，没有则 npm install）
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run build   # prebuild 会自动先编译 content/ 里的文章
+      - run: touch dist/.nojekyll   # 跳过 Jekyll 处理，文件原样发布
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
