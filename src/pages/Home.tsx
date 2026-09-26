@@ -15,8 +15,9 @@ export function formatDate(d: Date | string | null | undefined): string {
 }
 
 export function postUrl(slug: string): string {
-  return `/post/${slug.split("/").map(encodeURIComponent).join("/")}`;
+  return `/post/${slug}`;
 }
+
 
 export default function Home() {
   const { blogTitle, tagline } = useSiteSettings();
