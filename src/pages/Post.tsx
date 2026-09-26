@@ -13,12 +13,15 @@ export default function Post() {
   const params = useParams();
   // React Router 已对 params 做过一次 decode；数据库 slug 是逐段 encodeURIComponent 的形式，
   // 这里 re-encode 回去保持一致（对 URL 中 encoded / decoded 两种访问都成立）。
-  const slug = (params["*"] ?? "")
-    .split("/")
-    .map((seg) => encodeURIComponent(seg))
-    .join("/");
+    const raw = params["*"] ?? "";
+  const variants = [
+    raw,
+    raw.split("/").map((seg) => encodeURIComponent(seg)).join("/"),
+    decodeURIComponent(raw),
+  ];
 
-  const post = getPost(slug);
+  const post = variants.map((v) => getPost(v)).find(Boolean);
+
   const allPosts = listPosts();
 
   const titleIndex = useMemo(() => {
