@@ -1,5 +1,4 @@
-`yaml
-   name: 构建并部署到 GitHub Pages
+  name: 构建并部署到 GitHub Pages
 
    on:
      push:
